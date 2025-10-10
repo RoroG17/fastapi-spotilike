@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 from auth import create_access_token, get_current_user
 
-from db import get_session
+from db.db import get_session
 from models.artist_model import Artist
 from models.music_model import Music
 from models.album_model import Album

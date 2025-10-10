@@ -1,6 +1,6 @@
 from datetime import date, time
 from sqlmodel import Session
-from db import engine, init_db
+from db.db import engine, init_db
 from models.artist_model import Artist
 from models.music_model import Music
 from models.album_model import Album

@@ -1,1 +1,7 @@
 .venv
+MCD*
+entity
+spotilike.db
+__pycache__/
+*.py[cod]
+*$py.class
