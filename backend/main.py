@@ -1,6 +1,7 @@
 # app/main.py
 from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 from auth import create_access_token, get_current_user
 
@@ -16,21 +17,66 @@ from datetime import date, time
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # ou ["http://localhost:9000"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.get("/api/albums")
 def get_albums(session: Session = Depends(get_session)):
     albums = session.exec(select(Album)).all()
     return albums
 
+@app.get("/api/artists")
+def get_artists(session: Session = Depends(get_session)):
+    artists = session.exec(select(Artist)).all()
+    return artists
+
 @app.get("/api/albums/{album_id}")
 def get_album(album_id: int, session: Session = Depends(get_session)):
-    album = session.get(Album, album_id)
-    return album
+    statement = (
+        select(Album, Artist)
+        .join(Artist, Album.artist_id == Artist.id)
+        .where(Album.id == album_id)
+    )
+    result = session.exec(statement).first()
+
+    if not result:
+        return {"error": "Album not found"}
+
+    album, artist = result
+
+    return {
+        "album_id": album.id,
+        "title": album.title,
+        "release_year": album.release_year,
+        "cover": album.cover,
+        "artist_id": artist.id,
+        "artist_name": artist.name,
+    }
+
 
 @app.get("/api/albums/{album_id}/songs")
 def get_album_songs(album_id: int, session: Session = Depends(get_session)):
-    album = session.get(Album, album_id)
+    statement = (
+        select(Music, Genre)
+        .join(Genre, Music.genre_id == Genre.id)
+        .where(Music.album_id == album_id)
+    )
+    album = session.exec(statement).all()
     if album:
-        return album.musics
+        return [{
+            "id": music.id,
+            "title": music.title,
+            "duration": music.duration,
+            "genre_id": genre.id,
+            "genre": genre.name,
+            "album_id": music.album_id,
+            "artist_id": music.artist_id
+        } for music, genre in album]
     return []
 
 @app.get("/api/genres")
