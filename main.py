@@ -1,6 +1,8 @@
 # app/main.py
 from fastapi import FastAPI, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
+from auth import create_access_token, get_current_user
 
 from db import get_session
 from models.artist_model import Artist
@@ -8,6 +10,7 @@ from models.music_model import Music
 from models.album_model import Album
 from models.genre_model import Genre
 from models.user_model import User
+from models.auth_model import Token
 
 from datetime import date, time
 
@@ -49,11 +52,12 @@ def signup_user(user: User, session: Session = Depends(get_session)):
     session.refresh(user)
     return user
 
-@app.post("/api/users/login")
-def login_user(username: str, password: str, session: Session = Depends(get_session)):
-    user = session.exec(select(User).where(User.username == username)).first()
-    if user and user.hashed_password == password:
-        return {"message": "Login successful"}
+@app.post("/api/users/login", response_model=Token)
+def login_user(user_credentials : OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
+    user = session.exec(select(User).where(User.username == user_credentials.username)).first()
+    if user and user.hashed_password == user_credentials.password:
+        token = create_access_token(data={"user_id": user.id})
+        return {"message": "Login successful", "access_token": token, "token_type": "bearer"}
     return {"error": "Invalid credentials"}
 
 @app.post("/api/albums")
@@ -121,7 +125,8 @@ def update_genre(genre_id: int, updated_genre: Genre, session: Session = Depends
     return {"error": "Genre not found"}
 
 @app.delete("/api/users/{user_id}")
-def delete_user(user_id: int, session: Session = Depends(get_session)):
+def delete_user(user_id: int, session: Session = Depends(get_session), current_user: int =Depends(get_current_user)):
+    print(current_user)
     user = session.get(User, user_id)
     if user:
         session.delete(user)
@@ -130,7 +135,8 @@ def delete_user(user_id: int, session: Session = Depends(get_session)):
     return {"error": "User not found"}
 
 @app.delete("/api/albums/{album_id}")
-def delete_album(album_id: int, session: Session = Depends(get_session)):
+def delete_album(album_id: int, session: Session = Depends(get_session), current_user: int =Depends(get_current_user)):
+    print(current_user)
     album = session.get(Album, album_id)
     if album:
         session.delete(album)
@@ -139,7 +145,8 @@ def delete_album(album_id: int, session: Session = Depends(get_session)):
     return {"error": "Album not found"}
 
 @app.delete("/api/artists/{artist_id}")
-def delete_artist(artist_id: int, session: Session = Depends(get_session)):
+def delete_artist(artist_id: int, session: Session = Depends(get_session), current_user: int =Depends(get_current_user)):
+    print(current_user)
     artist = session.get(Artist, artist_id)
     if artist:
         session.delete(artist)
