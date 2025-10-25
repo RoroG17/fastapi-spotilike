@@ -30,15 +30,13 @@ import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink
 const linksList: EssentialLinkProps[] = [
   {
     title: 'Albums',
-    caption: 'quasar.dev',
     icon: 'music_note',
-    link: 'https://quasar.dev',
+    link: '/albums',
   },
   {
     title: 'Artistes',
-    caption: 'github.com/quasarframework',
     icon: 'people',
-    link: 'https://github.com/quasarframework',
+    link: '/artists',
   },
 ];
 
