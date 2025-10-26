@@ -35,6 +35,13 @@ def get_artists(session: Session = Depends(get_session)):
     artists = session.exec(select(Artist)).all()
     return artists
 
+@app.get("/api/artists/{artist_id}")
+def get_artist(artist_id: int, session: Session = Depends(get_session)):
+    artist = session.get(Artist, artist_id)
+    if artist:
+        return artist
+    return {"error": "Artist not found"}
+
 @app.get("/api/albums/{album_id}")
 def get_album(album_id: int, session: Session = Depends(get_session)):
     statement = (
@@ -86,9 +93,22 @@ def get_genres(session: Session = Depends(get_session)):
 
 @app.get("/api/artists/{artist_id}/songs")
 def get_artist_songs(artist_id: int, session: Session = Depends(get_session)):
-    artist = session.get(Artist, artist_id)
+    statement = (
+        select(Music, Genre)
+        .join(Genre, Music.genre_id == Genre.id)
+        .where(Music.artist_id == artist_id)
+    )
+    artist = session.exec(statement).all()
     if artist:
-        return artist.musics
+        return [{
+            "id": music.id,
+            "title": music.title,
+            "duration": music.duration,
+            "genre_id": genre.id,
+            "genre": genre.name,
+            "album_id": music.album_id,
+            "artist_id": music.artist_id
+        } for music, genre in artist]
     return []
 
 @app.post("/api/users/signup")
