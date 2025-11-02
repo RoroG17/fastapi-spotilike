@@ -7,7 +7,7 @@ from models.album_model import Album
 from models.genre_model import Genre
 from models.user_model import User
 
-# 1️⃣ Crée les tables si nécessaire
+# Crée les tables si nécessaire
 init_db()
 
 with Session(engine) as session:
@@ -71,8 +71,6 @@ with Session(engine) as session:
     session.add_all([morceau1, morceau2, morceau3, morceau4, morceau5])
     session.commit()
 
-    print("✅ Jeu de test inséré avec succès !")
-
     # -------------------
     # UTILISATEURS
     # -------------------
@@ -80,3 +78,6 @@ with Session(engine) as session:
     user1 = User(username="admin", email="admin@admin", hashed_password="1234")
     session.add(user1)
     session.commit()
+
+
+    print("Jeu de test inséré avec succès !")
