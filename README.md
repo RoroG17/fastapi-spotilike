@@ -29,7 +29,7 @@ Cette commande va :
 ```bash
 uvicorn main:app --reload --port 8000
 ```
-Le serveur sera accessible à l'adresse : http://localhost:8000
+Le serveur sera accessible à l'adresse : http://localhost:8000/docs
 
 ### Frontend (Quasar/Vue 3)
 
