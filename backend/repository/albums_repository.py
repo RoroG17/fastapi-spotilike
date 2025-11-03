@@ -74,3 +74,9 @@ def put_album(session: Session, album: Album, updated_album: Album):
 def del_album(session: Session, album: Album):
     session.delete(album)
     session.commit()
+
+def del_albums_with_artist(session: Session, artist: Artist):
+    albums = session.exec(select(Album).where(Album.artist_id == artist.id)).all()
+    for album in albums:
+        session.delete(album)
+    session.commit()

@@ -3,10 +3,9 @@ from sqlmodel import Session, select
 from db.db import get_session
 
 from models.artist_model import Artist
-from models.music_model import Music
-from models.genre_model import Genre
 
 from repository.artistes_repository import *
+from repository.albums_repository import del_albums_with_artist
 
 from auth import get_current_user
 
@@ -50,6 +49,7 @@ def update_artist(artist_id: int, updated_artist: Artist, session: Session = Dep
 def delete_artist(artist_id: int, session: Session = Depends(get_session), current_user: int =Depends(get_current_user)):
     artist = get_by_id(session, artist_id)
     if artist:
+        del_albums_with_artist(session, artist)
         del_artist(session, artist)
         return {"message": "Artist deleted successfully"}
     return {"error": "Artist not found", "status_code": 404}
